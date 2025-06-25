@@ -1,0 +1,15 @@
+{
+  "name":"Test User",
+  "address":{
+    "line1":"line1",
+    "line2":"line2",
+    "line3":"line3",
+    "town" : "town",
+    "county":"hertz",
+    "postcode":"sd12"
+  },
+  "phoneNumber":"12345",
+  "username":"mux",
+  "email":"mux@test.com",
+  "password":"Test123!"
+}
