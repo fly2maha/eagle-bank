@@ -710,6 +710,7 @@ components:
           type: string
           enum: 
             - "personal"
+            - "business"
     ListBankAccountsResponse:
       type: object
       required:
@@ -744,6 +745,7 @@ components:
           type: string
           enum: 
             - "personal"
+            - "business"
         balance:
           type: number
           format: decimal

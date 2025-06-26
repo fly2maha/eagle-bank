@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.eagle.bank.dto.BankAccountRequest;
 import org.eagle.bank.dto.BankAccountResponse;
 import org.eagle.bank.dto.CreateBankAccountRequest;
+import org.eagle.bank.dto.UpdateBankAccountRequest;
 import org.eagle.bank.model.BankAccount;
 import org.eagle.bank.model.User;
 import org.eagle.bank.service.BankAccountService;
@@ -74,7 +75,7 @@ public class AccountController {
         BankAccount acc = getUserAccount(accountNumber, authenticatedUser);
 
         if (acc == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or forbidden");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This account does not exist or you do not have access to it");
         }
         BankAccountResponse response = MapperUtil.toBankAccountResponse(acc);
         response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(acc.getAccountType().toUpperCase()));
@@ -97,7 +98,7 @@ public class AccountController {
 
     @PatchMapping("/{accountNumber}")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<?> updateAccount(@PathVariable String accountNumber, @RequestBody BankAccountRequest updateAccountRequest, HttpServletRequest request) {
+    public ResponseEntity<?> updateAccount(@PathVariable String accountNumber, @RequestBody UpdateBankAccountRequest updateAccountRequest, HttpServletRequest request) {
 
         User authenticatedUser = getAuthenticatedUser((Long) request.getAttribute("authenticatedUserId"));
 
@@ -106,29 +107,30 @@ public class AccountController {
         }
         BankAccount acc = getUserAccount(accountNumber, authenticatedUser);
         if (acc == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or forbidden");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not found or forbidden");
         }
-        if (updateAccountRequest.getBalance() != null) {
-            acc.setBalance(updateAccountRequest.getBalance());
-        }
-        BankAccount updated = accountService.updateAccount(acc);
-        return ResponseEntity.ok(updated);
+        MapperUtil.updateAccount(updateAccountRequest, acc);
+        BankAccount updatedAcc = accountService.updateAccount(acc);
+        BankAccountResponse response = MapperUtil.toBankAccountResponse(updatedAcc);
+        return ResponseEntity.ok(response);
     }
 
-//    @DeleteMapping("/{accountNumber}")
-//    @PreAuthorize("hasAuthority('USER')")
-//    public ResponseEntity<?> deleteAccount(@PathVariable String accountNumber, Principal principal) {
-//        User user = getAuthenticatedUser(principal);
-//        if (user == null) {
-//            return ResponseEntity.status(401).body("Unauthorized");
-//        }
-//        BankAccount acc = getUserAccount(accountNumber, user);
-//        if (acc == null) {
-//            return ResponseEntity.status(404).body("Account not found or forbidden");
-//        }
-//        accountService.deleteAccount(acc.getId());
-//        return ResponseEntity.noContent().build();
-//    }
+    @DeleteMapping("/{accountNumber}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> deleteAccount(@PathVariable String accountNumber, HttpServletRequest request) {
+        User authenticatedUser = getAuthenticatedUser((Long) request.getAttribute("authenticatedUserId"));
+
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        BankAccount acc = getUserAccount(accountNumber, authenticatedUser);
+
+        if (acc == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This account does not exist or you do not have access to it");
+        }
+        accountService.deleteAccount(acc.getId());
+        return ResponseEntity.noContent().build();
+    }
 
 
 

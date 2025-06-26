@@ -5,6 +5,7 @@ import org.eagle.bank.model.Address;
 import org.eagle.bank.model.BankAccount;
 import org.eagle.bank.model.Transaction;
 import org.eagle.bank.model.User;
+import org.hibernate.tuple.UpdateTimestampGeneration;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import java.time.Instant;
@@ -31,7 +32,9 @@ public class MapperUtil {
     }
 
     public static BankAccountResponse toBankAccountResponse(BankAccount bankAccount) {
-        return modelMapper.map(bankAccount, BankAccountResponse.class);
+        BankAccountResponse response = modelMapper.map(bankAccount, BankAccountResponse.class);
+        response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(bankAccount.getAccountType().toUpperCase()));
+        return response;
     }
 
     public static TransactionResponse toTransactionResponse(Transaction transaction) {
@@ -45,6 +48,13 @@ public class MapperUtil {
         return transactions.stream()
                 .map(MapperUtil::toTransactionResponse)
                 .collect(Collectors.toList());
+    }
+
+    public static BankAccount updateAccount(UpdateBankAccountRequest request, BankAccount bankAccount) {
+        if (request.getName() != null) {
+            bankAccount.setName(request.getName());
+        }
+        return bankAccount;
     }
 
 

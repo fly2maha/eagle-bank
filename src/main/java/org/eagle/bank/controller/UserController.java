@@ -95,4 +95,5 @@ public class UserController {
         Optional<User> userOpt = userService.getUserById(authenticatedUserId);
         return userOpt.orElse(null);
     }
+
 } 

@@ -24,7 +24,6 @@ public class AuthController {
     public static class LoginRequest {
         public String username;
         public String password;
-        // Getters and setters omitted for brevity
     }
 
     @PostMapping("/login")
