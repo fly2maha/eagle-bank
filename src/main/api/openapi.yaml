@@ -728,6 +728,7 @@ components:
         - name
         - accountType
         - balance
+        - userId
       properties:
         accountNumber:
           type: string
@@ -740,6 +741,8 @@ components:
           examples:
             - "10-10-20"
         name:
+          type: string
+        userId:
           type: string
         accountType:
           type: string
@@ -793,6 +796,9 @@ components:
         - id
         - amount
         - type
+        - userId
+        - accountId
+        - accountNumber
         - createdTimestamp
       properties:
         id: 
@@ -815,6 +821,12 @@ components:
         createdTimestamp:
           type: string
           format: 'date-time'
+        userId:
+          type: string
+        accountId:
+          type: string
+        accountNumber:
+          type: string
     CreateUserRequest:
       x-class-extra-annotation: "@lombok.Data"
       type: object

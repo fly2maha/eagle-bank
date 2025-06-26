@@ -2,7 +2,6 @@ package org.eagle.bank.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.eagle.bank.dto.CreateTransactionRequest;
-import org.eagle.bank.dto.TransactionRequest;
 import org.eagle.bank.dto.TransactionResponse;
 import org.eagle.bank.model.BankAccount;
 import org.eagle.bank.model.Transaction;

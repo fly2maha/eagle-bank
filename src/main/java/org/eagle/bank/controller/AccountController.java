@@ -2,7 +2,6 @@ package org.eagle.bank.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.eagle.bank.dto.BankAccountRequest;
 import org.eagle.bank.dto.BankAccountResponse;
 import org.eagle.bank.dto.CreateBankAccountRequest;
 import org.eagle.bank.dto.UpdateBankAccountRequest;

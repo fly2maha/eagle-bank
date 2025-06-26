@@ -33,12 +33,16 @@ public class MapperUtil {
 
     public static BankAccountResponse toBankAccountResponse(BankAccount bankAccount) {
         BankAccountResponse response = modelMapper.map(bankAccount, BankAccountResponse.class);
+        response.setUserId(bankAccount.getUser().getId().toString());
         response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(bankAccount.getAccountType().toUpperCase()));
         return response;
     }
 
     public static TransactionResponse toTransactionResponse(Transaction transaction) {
         TransactionResponse tx = modelMapper.map(transaction, TransactionResponse.class);
+        tx.setAccountId(transaction.getAccount().getId().toString());
+        tx.setAccountNumber(transaction.getAccount().getAccountNumber());
+        tx.setUserId(transaction.getAccount().getUser().getId().toString());
         tx.setCreatedTimestamp(transaction.getTimestamp().atOffset(ZoneOffset.UTC));
         return tx;
 
