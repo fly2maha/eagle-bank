@@ -90,8 +90,9 @@ public class AccountController {
         if (authenticatedUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        List<BankAccount> accounts = accountService.getAccountsByUser(authenticatedUser);
-        return ResponseEntity.ok(accounts);
+        List<BankAccount> bankAccounts = accountService.getAccountsByUser(authenticatedUser);
+        List<BankAccountResponse> responses = MapperUtil.toBankAccountResponseList(bankAccounts);
+        return ResponseEntity.ok(responses);
     }
 
 

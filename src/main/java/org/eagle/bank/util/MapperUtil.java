@@ -38,6 +38,12 @@ public class MapperUtil {
         return response;
     }
 
+    public static List<BankAccountResponse> toBankAccountResponseList(List<BankAccount> bankAccounts) {
+        return bankAccounts.stream()
+                .map(MapperUtil::toBankAccountResponse)
+                .collect(Collectors.toList());
+    }
+
     public static TransactionResponse toTransactionResponse(Transaction transaction) {
         TransactionResponse tx = modelMapper.map(transaction, TransactionResponse.class);
         tx.setAccountId(transaction.getAccount().getId().toString());
