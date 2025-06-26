@@ -691,12 +691,12 @@ components:
             - "My Account"
         accountType:
           type: string
-          enum: 
+          enum:
             - "personal"
             - "business"
         balance:
           type: number
-          format: double
+          format: decimal
           minimum: 50.00
     UpdateBankAccountRequest:
       type: object
@@ -727,9 +727,6 @@ components:
         - name
         - accountType
         - balance
-        - currency
-        - createdTimestamp
-        - updatedTimestamp
       properties:
         accountNumber:
           type: string
@@ -749,44 +746,30 @@ components:
             - "personal"
         balance:
           type: number
-          format: double
+          format: decimal
           minimum: 0.00
           maximum: 10000.00
           description: "Currency amount with up to two decimal places"
           examples:
             - 0.00
             - 1000.00
-        currency:
-          type: string
-          enum:
-            - "GBP"
-        createdTimestamp:
-          type: string
-          format: 'date-time'
-        updatedTimestamp:
-          type: string
-          format: 'date-time'
     CreateTransactionRequest:
       type: object
       required:
         - amount
-        - currency
         - type
       properties:
         amount:
           type: number
-          format: double
-          minimum: 0.00
+          format: decimal
+          minimum: 1.00
           maximum: 10000.00
           description: "Currency amount with up to two decimal places"
           examples:
             - 10.99
             - 1000.00
-        currency:
-          type: string
-          enum:
-            - "GBP"
         type:
+          x-field-extra-annotation: "@NotBlank"
           type: string
           enum: 
             - "deposit"
@@ -807,7 +790,6 @@ components:
       required:
         - id
         - amount
-        - currency
         - type
         - createdTimestamp
       properties:
@@ -818,13 +800,9 @@ components:
             - tan-123abc
         amount:
           type: number
-          format: double
-          minimum: 0.00
+          format: decimal
+          minimum: 1.00
           maximum: 10000.00
-        currency:
-          type: string
-          enum:
-            - "GBP"
         type:
           type: string
           enum: 
@@ -832,11 +810,6 @@ components:
             - "withdrawal"
         reference:
           type: string
-        userId:
-          type: string
-          format: ^usr-[A-Za-z0-9]+$
-          examples: 
-            - usr-abc123
         createdTimestamp:
           type: string
           format: 'date-time'
@@ -852,6 +825,7 @@ components:
         - password
       properties:
         name:
+          x-field-extra-annotation: "@NotBlank"
           type: string
           examples:
             - "Test User"
@@ -864,6 +838,7 @@ components:
             - postcode
           properties:
             line1:
+              x-field-extra-annotation: "@NotBlank"
               type: string
             line2:
               type: string
@@ -874,17 +849,22 @@ components:
             county:
               type: string
             postcode:
+              x-field-extra-annotation: "@NotBlank"
               type: string
         phoneNumber:
+          x-field-extra-annotation: "@NotBlank"
           type: string
           format: ^\+[1-9]\d{1,14}$
         email:
+          x-field-extra-annotation: "@NotBlank"
           type: string
           format: email
         username:
+          x-field-extra-annotation: "@NotBlank"
           type: string
           example: "testuser"
         password:
+          x-field-extra-annotation: "@NotBlank(message = \"Password must not be blank\")"
           type: string
           format: password
           minLength: 8

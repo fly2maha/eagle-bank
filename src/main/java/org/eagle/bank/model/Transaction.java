@@ -20,18 +20,23 @@ public class Transaction {
     @Column(nullable = false)
     private Instant timestamp;
 
+    @Column(nullable = true)
+    private String reference;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private BankAccount account;
 
+
     public Transaction() {}
 
-    public Transaction(Long id, TransactionType type, BigDecimal amount, Instant timestamp, BankAccount account) {
+    public Transaction(Long id, TransactionType type, BigDecimal amount, Instant timestamp, BankAccount account, String reference) {
         this.id = id;
         this.type = type;
         this.amount = amount;
         this.timestamp = timestamp;
         this.account = account;
+        this.reference = reference;
     }
 
     // Getters and setters
@@ -45,6 +50,15 @@ public class Transaction {
     public void setTimestamp(Instant timestamp) { this.timestamp = timestamp; }
     public BankAccount getAccount() { return account; }
     public void setAccount(BankAccount account) { this.account = account; }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
 
     public enum TransactionType {
         DEPOSIT, WITHDRAWAL
