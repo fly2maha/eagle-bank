@@ -22,9 +22,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.2.11</spring-boot.version>
-        <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <sonar-maven-plugin.version>3.9.0.2155</sonar-maven-plugin.version>
         <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
         <jakarta.annotation-api.version>2.1.0</jakarta.annotation-api.version>
         <jackson-databind-nullable>0.2.6</jackson-databind-nullable>
@@ -82,7 +80,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
@@ -96,8 +93,6 @@
             <version>${jakarta.annotation-api.version}</version>
             <scope>compile</scope>
         </dependency>
-
-
 
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -170,9 +165,6 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${maven-surefire-plugin.version}</version>
             <configuration>
-                <excludes>
-                    ${sonar.coverage.exclusions}
-                </excludes>
                 <includes>
                     <include>*Test*.java</include>
                 </includes>
