@@ -13,10 +13,13 @@ import java.util.Optional;
 public class UserService {
 
 
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    BCryptPasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
 
     public User createUser(User user) {
