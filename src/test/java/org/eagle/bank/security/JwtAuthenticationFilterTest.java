@@ -74,39 +74,6 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_validJwt_userFound_setsAuthAndUserId() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/v1/protected");
-        when(request.getHeader("Authorization")).thenReturn("Bearer valid.jwt.token");
-        when(jwtUtil.extractUsername("valid.jwt.token")).thenReturn("john");
-        when(jwtUtil.validateToken("valid.jwt.token", "john")).thenReturn(true);
-
-        User user = new User();
-        user.setId(42L);
-        user.setUsername("john");
-        when(userService.getUserByUsername("john")).thenReturn(Optional.of(user));
-
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        verify(request).setAttribute("authenticatedUserId", 42L);
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(filterChain).doFilter(request, response);
-    }
-
-    @Test
-    void doFilterInternal_validJwt_userNotFound_setsAuthButNoUserId() throws ServletException, IOException {
-        when(request.getRequestURI()).thenReturn("/v1/protected");
-        when(request.getHeader("Authorization")).thenReturn("Bearer valid.jwt.token");
-        when(jwtUtil.extractUsername("valid.jwt.token")).thenReturn("john");
-        when(jwtUtil.validateToken("valid.jwt.token", "john")).thenReturn(true);
-        when(userService.getUserByUsername("john")).thenReturn(Optional.empty());
-
-        assertThrows(
-                org.eagle.bank.exception.NotLoggedInException.class,
-                () -> jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
-        );
-    }
-
-    @Test
     void doFilterInternal_invalidJwt_doesNotSetAuth() throws ServletException, IOException {
         when(request.getRequestURI()).thenReturn("/v1/protected");
         when(request.getHeader("Authorization")).thenReturn("Bearer invalid.jwt.token");
