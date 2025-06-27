@@ -16,10 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/v1/accounts")
@@ -29,22 +27,6 @@ public class AccountController {
     BankAccountService accountService;
     @Autowired
     UserService userService;
-
-    private User getAuthenticatedUser(Long authenticatedUserId) {
-        Optional<User> userOpt = userService.getUserById(authenticatedUserId);
-        return userOpt.orElse(null);
-    }
-
-    private BankAccount getUserAccount(String accountNumber, User user) {
-
-        Optional<BankAccount> accOpt = accountService.getAccountByAccountNumber(accountNumber);
-        if (accOpt.isEmpty()) {
-            return null;
-        }
-        BankAccount acc = accOpt.get();
-        if (!acc.getUser().getId().equals(user.getId())) return null;
-        return acc;
-    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
@@ -66,6 +48,7 @@ public class AccountController {
     @GetMapping("/{accountNumber}")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> getAccount(@PathVariable String accountNumber, HttpServletRequest request) {
+
         User authenticatedUser = getAuthenticatedUser((Long) request.getAttribute("authenticatedUserId"));
 
         if (authenticatedUser == null) {
@@ -76,6 +59,7 @@ public class AccountController {
         if (acc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This account does not exist or you do not have access to it");
         }
+
         BankAccountResponse response = MapperUtil.toBankAccountResponse(acc);
         response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(acc.getAccountType().toUpperCase()));
         return ResponseEntity.ok(response);
@@ -90,6 +74,7 @@ public class AccountController {
         if (authenticatedUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
+
         List<BankAccount> bankAccounts = accountService.getAccountsByUser(authenticatedUser);
         List<BankAccountResponse> responses = MapperUtil.toBankAccountResponseList(bankAccounts);
         return ResponseEntity.ok(responses);
@@ -109,6 +94,7 @@ public class AccountController {
         if (acc == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account not found or forbidden");
         }
+
         MapperUtil.updateAccount(updateAccountRequest, acc);
         BankAccount updatedAcc = accountService.updateAccount(acc);
         BankAccountResponse response = MapperUtil.toBankAccountResponse(updatedAcc);
@@ -132,6 +118,22 @@ public class AccountController {
         return ResponseEntity.noContent().build();
     }
 
+
+    private User getAuthenticatedUser(Long authenticatedUserId) {
+        Optional<User> userOpt = userService.getUserById(authenticatedUserId);
+        return userOpt.orElse(null);
+    }
+
+    private BankAccount getUserAccount(String accountNumber, User user) {
+
+        Optional<BankAccount> accOpt = accountService.getAccountByAccountNumber(accountNumber);
+        if (accOpt.isEmpty()) {
+            return null;
+        }
+        BankAccount acc = accOpt.get();
+        if (!acc.getUser().getId().equals(user.getId())) return null;
+        return acc;
+    }
 
 
 }

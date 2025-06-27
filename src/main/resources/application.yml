@@ -17,4 +17,19 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
 jwt:
-  secret: eagle-bank-secret-key-eagle-bank-secret-key 
+  secret: eagle-bank-secret-key-eagle-bank-secret-key
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.eagle.bank: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/eagle-bank.log

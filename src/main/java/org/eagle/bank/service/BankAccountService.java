@@ -22,7 +22,6 @@ public class BankAccountService {
     }
 
     public BankAccount createAccount(BankAccount account) {
-        // TODO: Add validation, account number generation, etc.
         return accountRepository.save(account);
     }
 
@@ -39,7 +38,6 @@ public class BankAccountService {
     }
 
     public BankAccount updateAccount(BankAccount account) {
-        // TODO: Add validation, only allow updating own account, etc.
         return accountRepository.save(account);
     }
 

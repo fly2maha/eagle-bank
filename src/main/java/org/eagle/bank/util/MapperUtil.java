@@ -1,13 +1,18 @@
 package org.eagle.bank.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eagle.bank.dto.*;
+import org.eagle.bank.exception.MappingException;
 import org.eagle.bank.model.Address;
 import org.eagle.bank.model.BankAccount;
 import org.eagle.bank.model.Transaction;
 import org.eagle.bank.model.User;
-import org.hibernate.tuple.UpdateTimestampGeneration;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -15,16 +20,27 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Component
 public class MapperUtil {
     private static final ModelMapper modelMapper = new ModelMapper();
+    private static final Logger logger = LoggerFactory.getLogger(MapperUtil.class);
+
     static {
         // Register Instant → OffsetDateTime converter
         Converter<Instant, OffsetDateTime> instantToOffsetConverter = ctx ->
                 ctx.getSource() == null ? null : ctx.getSource().atOffset(ZoneOffset.UTC);
         modelMapper.addConverter(instantToOffsetConverter);
     }
+
+
     public static User toUser(CreateUserRequest request) {
-        return modelMapper.map(request, User.class);
+        try {
+            return modelMapper.map(request, User.class);
+        } catch (MappingException ex) {
+            logger.error("Mapping failed at create new user: {}", ex.getMessage(), ex);
+            throw new MappingException("Mapping failed", ex);
+        }
     }
 
     public static UserResponse toUserResponse(User user) {
@@ -32,10 +48,16 @@ public class MapperUtil {
     }
 
     public static BankAccountResponse toBankAccountResponse(BankAccount bankAccount) {
-        BankAccountResponse response = modelMapper.map(bankAccount, BankAccountResponse.class);
-        response.setUserId(bankAccount.getUser().getId().toString());
-        response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(bankAccount.getAccountType().toUpperCase()));
-        return response;
+        try {
+            BankAccountResponse response = modelMapper.map(bankAccount, BankAccountResponse.class);
+            response.setUserId(bankAccount.getUser().getId().toString());
+            response.setAccountType(BankAccountResponse.AccountTypeEnum.valueOf(bankAccount.getAccountType().toUpperCase()));
+            return response;
+        } catch (MappingException ex) {
+            logger.error("Mapping failed at BankAccountResponse: {}", ex.getMessage(), ex);
+            throw new MappingException("Mapping failed", ex);
+        }
+
     }
 
     public static List<BankAccountResponse> toBankAccountResponseList(List<BankAccount> bankAccounts) {
@@ -60,11 +82,10 @@ public class MapperUtil {
                 .collect(Collectors.toList());
     }
 
-    public static BankAccount updateAccount(UpdateBankAccountRequest request, BankAccount bankAccount) {
+    public static void updateAccount(UpdateBankAccountRequest request, BankAccount bankAccount) {
         if (request.getName() != null) {
             bankAccount.setName(request.getName());
         }
-        return bankAccount;
     }
 
 
@@ -101,14 +122,21 @@ public class MapperUtil {
     }
 
     public static BankAccount getBankAccount(CreateBankAccountRequest createAccountRequest, User authenticatedUser) {
-        BankAccount account = new BankAccount();
-        account.setName(createAccountRequest.getName());
-        account.setAccountNumber(accountNoGenerator());
-        account.setSortCode(sortCodeGenerator());
-        account.setBalance(createAccountRequest.getBalance());
-        account.setAccountType(createAccountRequest.getAccountType().toString());
-        account.setUser(authenticatedUser);
-        return account;
+
+        try {
+            BankAccount account = new BankAccount();
+            account.setName(createAccountRequest.getName());
+            account.setAccountNumber(accountNoGenerator());
+            account.setSortCode(sortCodeGenerator());
+            account.setBalance(createAccountRequest.getBalance());
+            account.setAccountType(createAccountRequest.getAccountType().toString());
+            account.setUser(authenticatedUser);
+            return account;
+        } catch (MappingException ex) {
+            logger.error("Mapping failed at getBankAccount: {}", ex.getMessage(), ex);
+            throw new MappingException("Mapping failed", ex);
+        }
+
     }
 
     public static Transaction getTransaction(CreateTransactionRequest transactionRequest, BankAccount bankAccount, User user) {

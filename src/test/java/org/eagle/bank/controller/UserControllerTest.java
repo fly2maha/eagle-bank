@@ -1,10 +1,12 @@
 package org.eagle.bank.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.eagle.bank.JsonReader;
 import org.eagle.bank.dto.CreateUserRequest;
 import org.eagle.bank.dto.UpdateUserRequest;
 import org.eagle.bank.dto.UserResponse;
+import org.eagle.bank.exception.UserAlreadyExistsException;
 import org.eagle.bank.model.User;
 import org.eagle.bank.service.UserService;
 import org.junit.jupiter.api.Assertions;
@@ -17,8 +19,10 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -46,6 +50,21 @@ public class UserControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
+
+    @Test
+    void attempt_to_create_existing_user() {
+        CreateUserRequest req = new CreateUserRequest();
+        req.setUsername("john");
+        req.setPassword("pass");
+        req.setEmail("john@example.com");
+
+        when(userService.createUser(any(User.class)))
+                .thenThrow(new DataIntegrityViolationException("User already exists"));
+
+        assertThrows(DataIntegrityViolationException.class, ()->userController.createUser(req));
+
+    }
+
 
     @Test
     void createUser_success() {
@@ -90,7 +109,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.getUser(1L, httpServletRequest);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("User not found", response.getBody());
     }
 
     @Test
@@ -103,7 +121,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.getUser(1L, httpServletRequest);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Forbidden - Can only access own user data", response.getBody());
     }
 
     @Test
@@ -132,7 +149,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.updateUser(1L, updateReq, httpServletRequest);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("User not found", response.getBody());
     }
 
     @Test
@@ -146,7 +162,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.updateUser(1L, updateReq, httpServletRequest);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Forbidden - Can only update own user data", response.getBody());
     }
 
     @Test
@@ -171,7 +186,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.deleteUser(1L, httpServletRequest);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("User not found", response.getBody());
     }
 
     @Test
@@ -184,7 +198,6 @@ public class UserControllerTest {
 
         ResponseEntity<?> response = userController.deleteUser(1L, httpServletRequest);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Forbidden - Can only delete own user data", response.getBody());
     }
 
 

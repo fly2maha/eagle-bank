@@ -17,8 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.security.Principal;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,8 +54,8 @@ public class TransactionController {
         if (transactionRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResponseEntity.badRequest().body("Amount must be more than zero");
         }
-        if (type == Transaction.TransactionType.WITHDRAWAL && authenticatedUserAcc.getBalance().compareTo(transactionRequest.getAmount()) < 0
-                ) {
+        if (type == Transaction.TransactionType.WITHDRAWAL &&
+                authenticatedUserAcc.getBalance().compareTo(transactionRequest.getAmount()) < 0) {
             return ResponseEntity.badRequest().body("Insufficient funds");
         }
         Transaction tx = MapperUtil.getTransaction(transactionRequest, authenticatedUserAcc, authenticatedUser);
@@ -66,23 +64,6 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
-    private User getAuthenticatedUser(Long authenticatedUserId) {
-        Optional<User> userOpt = userService.getUserById(authenticatedUserId);
-        return userOpt.orElse(null);
-    }
-
-
-    private BankAccount getAuthenticatedUserAccount(String accountNumber, User user) {
-
-        List<BankAccount> userAccounts = user.getAccounts();
-        for (BankAccount acc : userAccounts) {
-            if (acc.getAccountNumber().equals(accountNumber)) {
-                return acc;
-            }
-        }
-        return null;
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
@@ -99,23 +80,43 @@ public class TransactionController {
         List<TransactionResponse> response = MapperUtil.toTransactionResponseList(transactions);
         return ResponseEntity.ok(response);
     }
-//
-//    @GetMapping("/{transactionId}")
-//    @PreAuthorize("hasAuthority('USER')")
-//    public ResponseEntity<?> getTransaction(@PathVariable String accountNumber, @PathVariable Long transactionId, Principal principal) {
-//        User user = getAuthenticatedUser(principal);
-//        if (user == null) {
-//            return ResponseEntity.status(401).body("Unauthorized");
-//        }
-//        BankAccount acc = getUserAccount(accountNumber, user);
-//        if (acc == null) {
-//            return ResponseEntity.status(404).body("Account not found or forbidden");
-//        }
-//        Optional<Transaction> txOpt = transactionService.getTransactionByIdAndAccount(transactionId, acc);
-//        if (txOpt.isEmpty()) {
-//            return ResponseEntity.status(404).body("Transaction not found");
-//        }
-//        Transaction tx = txOpt.get();
-//        return ResponseEntity.ok(tx);
-//    }
+
+    @GetMapping("/{transactionId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> getTransaction(@PathVariable String accountNumber, @PathVariable Long transactionId,
+                                            HttpServletRequest request) {
+        User authenticatedUser = getAuthenticatedUser((Long) request.getAttribute("authenticatedUserId"));
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        BankAccount acc = getAuthenticatedUserAccount(accountNumber, authenticatedUser);
+        if (acc == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or forbidden");
+        }
+        Optional<Transaction> txOpt = transactionService.getTransactionByIdAndAccount(transactionId, acc);
+        if (txOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Transaction not found");
+        }
+        Transaction tx = txOpt.get();
+        TransactionResponse response = MapperUtil.toTransactionResponse(tx);
+        return ResponseEntity.ok(response);
+    }
+
+
+    private User getAuthenticatedUser(Long authenticatedUserId) {
+        Optional<User> userOpt = userService.getUserById(authenticatedUserId);
+        return userOpt.orElse(null);
+    }
+
+    private BankAccount getAuthenticatedUserAccount(String accountNumber, User user) {
+
+        List<BankAccount> userAccounts = user.getAccounts();
+        for (BankAccount acc : userAccounts) {
+            if (acc.getAccountNumber().equals(accountNumber)) {
+                return acc;
+            }
+        }
+        return null;
+    }
+
 } 

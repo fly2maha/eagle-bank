@@ -18,8 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,12 +40,12 @@ class JwtAuthenticationFilterTest {
     @Mock
     FilterChain filterChain;
 
+    @InjectMocks
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, userService);
         SecurityContextHolder.clearContext();
     }
 
@@ -101,11 +100,10 @@ class JwtAuthenticationFilterTest {
         when(jwtUtil.validateToken("valid.jwt.token", "john")).thenReturn(true);
         when(userService.getUserByUsername("john")).thenReturn(Optional.empty());
 
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        verify(request, never()).setAttribute(eq("authenticatedUserId"), any());
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(filterChain).doFilter(request, response);
+        assertThrows(
+                org.eagle.bank.exception.NotLoggedInException.class,
+                () -> jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
+        );
     }
 
     @Test
